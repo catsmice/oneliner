@@ -2,6 +2,9 @@
 
 A modern, professional web tool for converting multi-line commands and text into clean, single-line format. Perfect for developers working with SQL queries, curl commands, shell scripts, and any multi-line text that needs to be converted to one-liners.
 
+You can try it here:
+https://catsmice.github.io/oneliner/
+
 ## 🚀 Features
 
 ### Dual Mode Support
