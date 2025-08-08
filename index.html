@@ -958,8 +958,24 @@ Repository: https://github.com/catsmice/oneliner
             if (numberedPattern.test(input)) {
                 const parts = input.split(/^\s*\d+\.\s+/gm).filter(part => part.trim());
                 parts.forEach(part => {
+                    // Remove the title/description line (everything before first actual command)
+                    const lines = part.split('\n');
+                    let cleanedPart = [];
+                    let foundCommand = false;
+                    
+                    for (let line of lines) {
+                        // Skip title lines (lines that don't start with command or #)
+                        if (!foundCommand && !commandPrefixes.test(line.trim()) && !line.trim().startsWith('#')) {
+                            continue;
+                        }
+                        foundCommand = true;
+                        cleanedPart.push(line);
+                    }
+                    
+                    const cleanedText = cleanedPart.join('\n');
+                    
                     // Further split by double newlines within each numbered section
-                    const subParts = part.split(/\n\s*\n/).filter(p => p.trim());
+                    const subParts = cleanedText.split(/\n\s*\n/).filter(p => p.trim());
                     subParts.forEach(subPart => {
                         if (subPart.trim()) {
                             commands.push(subPart.trim());
@@ -1005,9 +1021,24 @@ Repository: https://github.com/catsmice/oneliner
             
             let result = input;
             
+            // Always remove # comment lines for multi-line commands in multiple mode
+            if (currentMode === 'multiple') {
+                // Remove lines that start with # (bash/shell comments)
+                result = result.split('\n')
+                    .filter(line => !line.trim().startsWith('#'))
+                    .join('\n');
+            }
+            
             if (removeCommentsCheckbox.checked) {
+                // Remove SQL-style comments
                 result = result.replace(/--.*$/gm, '');
                 result = result.replace(/\/\*[\s\S]*?\*\//g, '');
+                // Also remove # comments if checkbox is checked
+                if (currentMode === 'single') {
+                    result = result.split('\n')
+                        .filter(line => !line.trim().startsWith('#'))
+                        .join('\n');
+                }
             }
             
             let lines = result.split('\n');
